@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo -e "\e[32m"
+
 echo ".dotfile installation STARTING"
 
 apt-get install -y zsh
