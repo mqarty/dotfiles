@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo -e "\e[32m"
 echo ".dotfile installation STARTING"
 
 apt-get install -y zsh
@@ -41,6 +42,5 @@ sed -i '/^ZSH_THEME/c\ZSH_THEME="agnoster"' ~/.zshrc
 zsh -c 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
 zsh -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
 
-echo -e "\e[32m"
 echo ".dotfile installation COMPLETE"
 echo -e "\e[0m"

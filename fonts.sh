@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo -e "\e[32m"
 apt install -y fontconfig
 
 declare -a fonts=(
@@ -49,3 +50,4 @@ done
 find "$fonts_dir" -name 'Windows Compatible' -delete
 
 fc-cache -fv
+echo -e "\e[0m"
