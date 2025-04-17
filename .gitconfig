@@ -1,0 +1,19 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = Marty Berryman
+	email = mqarty@gmail.com
+
+[push]
+	autoSetupRemote = true
+	
+[alias]
+    co = checkout
+	p = push
+	st = status -sb
+	cm = commit -m
+	br = branch
+
+[branch]
+	# from https://youtu.be/aolI_Rz0ZqY?t=1034
+	sort = -committerdate
