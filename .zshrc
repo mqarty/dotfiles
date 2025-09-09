@@ -133,3 +133,11 @@ export NVM_DIR="$HOME/.nvm"
 
 alias dc="docker compose"
 alias tf="terraform"
+
+# Kubectl context aliases
+alias kdev='kubectl config use-context arn:aws:eks:us-west-2:430118827826:cluster/resiquant-eks-dev'
+alias kprod='kubectl config use-context arn:aws:eks:us-west-2:047719659041:cluster/resiquant-eks-prod'
+alias kctx='kubectl config current-context'
+
+# Check which context and test connection
+alias kcheck='kubectl config current-context && kubectl get nodes'
