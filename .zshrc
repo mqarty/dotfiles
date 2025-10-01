@@ -70,7 +70,7 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions dirhistory)
+plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions zsh-history-substring-search dirhistory)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -143,6 +143,12 @@ alias tf="terraform"
 alias kdev='kubectl config use-context arn:aws:eks:us-west-2:430118827826:cluster/resiquant-eks-dev'
 alias kprod='kubectl config use-context arn:aws:eks:us-west-2:047719659041:cluster/resiquant-eks-prod'
 alias kctx='kubectl config current-context'
+
+# zsh-history-substring-search key bindings
+bindkey '^[[A' history-substring-search-up    # UP arrow
+bindkey '^[[B' history-substring-search-down  # DOWN arrow
+bindkey '^P' history-substring-search-up      # Ctrl+P  
+bindkey '^N' history-substring-search-down    # Ctrl+N
 
 # Check which context and test connection
 alias kcheck='kubectl config current-context && kubectl get nodes'
