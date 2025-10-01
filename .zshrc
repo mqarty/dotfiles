@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="bira"
+ZSH_THEME="agnoster"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -70,7 +70,7 @@ ZSH_THEME="bira"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions history dirhistory)
+plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions dirhistory)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -107,17 +107,20 @@ source $ZSH/oh-my-zsh.sh
 if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     # We're in a container
     export HISTFILE="${HISTFILE:-$HOME/.zsh_history}"
+    export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
+    export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
     
-    # Option to use separate history for container
-    if [ -f "$HOME/.zsh_history_local" ]; then
-        export HISTFILE="$HOME/.zsh_history_local"
-    fi
+    # # Option to use separate history for container
+    # if [ -f "$HOME/.zsh_history_local" ]; then
+    #     export HISTFILE="$HOME/.zsh_history_local"
+    # fi
 fi
 
 # History options
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits
 setopt SHARE_HISTORY             # Share history between all sessions
+setopt APPEND_HISTORY            # Append to the history file, don't overwrite it
 setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history
 setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again
 setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate
@@ -131,6 +134,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+alias gs="git status"
+alias gc="git commit"
 alias dc="docker compose"
 alias tf="terraform"
 
