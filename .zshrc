@@ -105,15 +105,54 @@ source $ZSH/oh-my-zsh.sh
 
 # Enhanced history configuration for devcontainers
 if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
-    # We're in a container
-    export HISTFILE="${HISTFILE:-$HOME/.zsh_history}"
+    # We're in a container - use container-specific history with sync
+    export HISTFILE="${HISTFILE:-$HOME/.zsh_history_container}"
     export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
     export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
     
-    # # Option to use separate history for container
-    # if [ -f "$HOME/.zsh_history_local" ]; then
-    #     export HISTFILE="$HOME/.zsh_history_local"
-    # fi
+    # History corruption protection function
+    fix_corrupt_history() {
+        if [[ -f "$HISTFILE" ]] && ! fc -R "$HISTFILE" 2>/dev/null; then
+            echo "🔧 Fixing corrupted history file..."
+            # Create backup
+            cp "$HISTFILE" "${HISTFILE}.corrupt.$(date +%s)" 2>/dev/null || true
+            # Try to salvage what we can
+            if command -v strings >/dev/null; then
+                strings "$HISTFILE" | grep -v '^$' > "${HISTFILE}.tmp" 2>/dev/null && mv "${HISTFILE}.tmp" "$HISTFILE" 2>/dev/null
+            else
+                # Fallback: start with fresh history
+                echo "# ZSH History - Recovered $(date)" > "$HISTFILE"
+            fi
+            echo "✅ History file repaired"
+        fi
+    }
+    
+    # Sync function to merge host history (optional)
+    sync_host_history() {
+        if [[ -f "$HOME/.zsh_history" && -f "$HISTFILE" ]]; then
+            echo "🔄 Syncing with host history..."
+            # Backup current container history
+            cp "$HISTFILE" "${HISTFILE}.pre-sync.$(date +%s)"
+            # Try to merge (avoiding corruption)
+            {
+                cat "$HOME/.zsh_history" 2>/dev/null | strings 2>/dev/null
+                cat "$HISTFILE" 2>/dev/null | strings 2>/dev/null
+            } | sort -u > "${HISTFILE}.merged" && mv "${HISTFILE}.merged" "$HISTFILE"
+        fi
+    }
+    
+    # Check and fix history on startup
+    fix_corrupt_history
+    
+    # Option to use separate history for container
+    if [ -f "$HOME/.zsh_history_local" ]; then
+        export HISTFILE="$HOME/.zsh_history_local"
+    fi
+else
+    # Not in container, use standard history
+    export HISTFILE="${HISTFILE:-$HOME/.zsh_history}"
+    export HISTSIZE="${HISTSIZE:-50000}"
+    export SAVEHIST="${SAVEHIST:-50000}"
 fi
 
 # History options
@@ -129,6 +168,7 @@ setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space
 setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file
 setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion
+setopt HIST_FCNTL_LOCK           # Use fcntl for safer file locking (if available)
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -139,16 +179,20 @@ alias gc="git commit"
 alias dc="docker compose"
 alias tf="terraform"
 
+# History management aliases
+alias fix-history='fix_corrupt_history'
+alias history-backup='cp "$HISTFILE" "${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"'
+alias sync-history='sync_host_history'
+
 # Kubectl context aliases
 alias kdev='kubectl config use-context arn:aws:eks:us-west-2:430118827826:cluster/resiquant-eks-dev'
 alias kprod='kubectl config use-context arn:aws:eks:us-west-2:047719659041:cluster/resiquant-eks-prod'
 alias kctx='kubectl config current-context'
+# Check which context and test connection
+alias kcheck='kubectl config current-context && kubectl get nodes'
 
 # zsh-history-substring-search key bindings
 bindkey '^[[A' history-substring-search-up    # UP arrow
 bindkey '^[[B' history-substring-search-down  # DOWN arrow
 bindkey '^P' history-substring-search-up      # Ctrl+P  
 bindkey '^N' history-substring-search-down    # Ctrl+N
-
-# Check which context and test connection
-alias kcheck='kubectl config current-context && kubectl get nodes'
