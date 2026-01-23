@@ -191,3 +191,5 @@ bindkey '^[[A' history-substring-search-up    # UP arrow
 bindkey '^[[B' history-substring-search-down  # DOWN arrow
 bindkey '^P' history-substring-search-up      # Ctrl+P  
 bindkey '^N' history-substring-search-down    # Ctrl+N
+
+complete -C '/usr/local/bin/aws_completer' aws
