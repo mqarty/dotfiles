@@ -47,5 +47,16 @@ zsh -c 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:
 zsh -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
 zsh -c 'git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search'
 
+# Install fzf for fuzzy autocomplete
+echo "Installing fzf for fuzzy finding..."
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || true
+~/.fzf/install --zsh --no-update-rc 2>/dev/null || true
+
+# Enable Terraform autocomplete if terraform is installed
+if command -v terraform >/dev/null 2>&1; then
+    echo "Setting up Terraform autocomplete..."
+    terraform -install-autocomplete || true
+fi
+
 echo ".dotfile installation COMPLETE"
 echo -e "\e[0m"

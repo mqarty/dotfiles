@@ -70,7 +70,7 @@ zstyle ':omz:update' frequency 7
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions zsh-history-substring-search dirhistory)
+plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-autosuggestions zsh-history-substring-search dirhistory docker docker-compose aws terraform npm poetry)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -201,3 +201,9 @@ bindkey '^P' history-substring-search-up      # Ctrl+P
 bindkey '^N' history-substring-search-down    # Ctrl+N
 
 complete -C '/usr/local/bin/aws_completer' aws
+
+# Enable fzf if installed (fuzzy finder for commands, files, and history)
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+    export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:wrap"
+fi
