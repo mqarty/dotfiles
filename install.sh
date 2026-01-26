@@ -4,26 +4,29 @@ echo -e "\e[32m"
 
 echo ".dotfile installation STARTING"
 
-apt-get install -y zsh
+# zsh should already be installed in the Dockerfile, but ensure it's there
+if ! command -v zsh &> /dev/null; then
+    echo "Installing zsh..."
+    apt-get update && apt-get install -y zsh
+fi
 
 cat bashrc.additions >> ~/.bashrc
 
 cp ./.gitconfig ~
 
-# # powerline fonts for zsh agnoster theme
-# git clone https://github.com/powerline/fonts.git
-# cd fonts
-# ./install.sh
-# cd .. && rm -rf fonts
-
 # Install Nerd Fonts
 ./fonts.sh
 
-# oh-my-zsh & plugins
-# Install using official method
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
-# Update to latest version
-zsh -c 'omz update' || true
+# oh-my-zsh & plugins - check if already installed from Dockerfile
+if [ ! -d "/root/.oh-my-zsh" ]; then
+    echo "Installing oh-my-zsh (not found in image)..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
+else
+    echo "oh-my-zsh already installed, updating..."
+    zsh -c 'omz update' || true
+fi
+
+# Copy zshrc (this will have user customizations)
 cp ./.zshrc ~
 
 ########################################################################################################################
@@ -43,19 +46,35 @@ mv ~/.zshrc.bak ~/.zshrc
 sed -i '/^ZSH_THEME/c\ZSH_THEME="agnoster"' ~/.zshrc
 ########################################################################################################################
 
-zsh -c 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
-zsh -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
-zsh -c 'git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search'
+# Install zsh plugins if not already installed from Dockerfile
+if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
+    echo "Installing zsh-autosuggestions..."
+    zsh -c 'git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
+fi
 
-# Install fzf for fuzzy autocomplete
-echo "Installing fzf for fuzzy finding..."
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || true
-~/.fzf/install --zsh --no-update-rc 2>/dev/null || true
+if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
+    echo "Installing zsh-syntax-highlighting..."
+    zsh -c 'git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
+fi
+
+if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search" ]; then
+    echo "Installing zsh-history-substring-search..."
+    zsh -c 'git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search'
+fi
+
+# Install fzf for fuzzy autocomplete if not already installed
+if [ ! -d "~/.fzf" ]; then
+    echo "Installing fzf for fuzzy finding..."
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || true
+    ~/.fzf/install --all --no-update-rc 2>/dev/null || true
+else
+    echo "fzf already installed"
+fi
 
 # Enable Terraform autocomplete if terraform is installed
 if command -v terraform >/dev/null 2>&1; then
     echo "Setting up Terraform autocomplete..."
-    terraform -install-autocomplete || true
+    terraform -install-autocomplete 2>/dev/null || true
 fi
 
 echo ".dotfile installation COMPLETE"
