@@ -76,6 +76,11 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
+# Load secrets (API keys, tokens, etc.)
+if [ -f ~/.zshrc.secrets ]; then
+    source ~/.zshrc.secrets
+fi
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment

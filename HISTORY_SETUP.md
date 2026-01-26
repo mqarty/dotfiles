@@ -2,6 +2,23 @@
 
 This configuration provides robust history management for zsh in devcontainer environments, with built-in corruption protection and recovery.
 
+## Quick Start - Fix Corrupted History Now
+
+If you're seeing a corrupted history error right now:
+
+```bash
+# Quick fix - restart your shell (auto-repair will run)
+exec zsh
+
+# OR manually repair
+fix-history
+
+# OR start completely fresh
+echo "# Fresh history $(date)" > ~/.zsh_history
+chmod 600 ~/.zsh_history
+exec zsh
+```
+
 ## Features
 
 ### 🔧 Automatic Corruption Detection & Repair
