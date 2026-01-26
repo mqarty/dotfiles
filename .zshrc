@@ -25,11 +25,11 @@ ZSH_THEME="agnoster"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
+zstyle ':omz:update' frequency 7
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -190,6 +190,9 @@ alias tf="terraform"
 alias fix-history='fix_corrupt_history'
 alias history-backup='cp "$HISTFILE" "${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"'
 alias sync-history='sync_host_history'
+
+# Oh My Zsh update alias
+alias omz-update='omz update'
 
 # zsh-history-substring-search key bindings
 bindkey '^[[A' history-substring-search-up    # UP arrow
