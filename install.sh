@@ -20,7 +20,10 @@ cp ./.gitconfig ~
 ./fonts.sh
 
 # oh-my-zsh & plugins
-wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+# Install using official method
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
+# Update to latest version
+zsh -c 'omz update' || true
 cp ./.zshrc ~
 
 ########################################################################################################################
