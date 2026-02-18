@@ -114,7 +114,7 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     export HISTFILE="${HISTFILE:-$HOME/.zsh_history_container}"
     export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
     export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
-    
+
     # History corruption protection function
     fix_corrupt_history() {
         if [[ -f "$HISTFILE" ]] && ! fc -R "$HISTFILE" 2>/dev/null; then
@@ -131,7 +131,7 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             echo "✅ History file repaired"
         fi
     }
-    
+
     # Sync function to merge host history (optional)
     sync_host_history() {
         if [[ -f "$HOME/.zsh_history" && -f "$HISTFILE" ]]; then
@@ -145,10 +145,10 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             } | sort -u > "${HISTFILE}.merged" && mv "${HISTFILE}.merged" "$HISTFILE"
         fi
     }
-    
+
     # Check and fix history on startup
     fix_corrupt_history
-    
+
     # Option to use separate history for container
     if [ -f "$HOME/.zsh_history_local" ]; then
         export HISTFILE="$HOME/.zsh_history_local"
@@ -197,7 +197,7 @@ alias omz-update='omz update'
 # zsh-history-substring-search key bindings
 bindkey '^[[A' history-substring-search-up    # UP arrow
 bindkey '^[[B' history-substring-search-down  # DOWN arrow
-bindkey '^P' history-substring-search-up      # Ctrl+P  
+bindkey '^P' history-substring-search-up      # Ctrl+P
 bindkey '^N' history-substring-search-down    # Ctrl+N
 
 complete -C '/usr/local/bin/aws_completer' aws
@@ -207,3 +207,9 @@ if [ -f ~/.fzf.zsh ]; then
     source ~/.fzf.zsh
     export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:wrap"
 fi
+
+# Load pyenv automatically
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+
