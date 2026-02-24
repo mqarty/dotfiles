@@ -6,13 +6,17 @@
 
 [push]
 	autoSetupRemote = true
-	
+
+[fetch]
+	prune = true
+
 [alias]
     co = checkout
 	p = push
 	st = status -sb
 	cm = commit -m
 	br = branch
+	prune-gone = "!git fetch --all --prune && for b in $(git branch -vv | awk '/: gone]/{print $1}'); do git branch --merged | grep -q \"^[* ] $b$\" && git branch -d \"$b\"; done"
 
 [branch]
 	# from https://youtu.be/aolI_Rz0ZqY?t=1034
