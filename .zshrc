@@ -203,9 +203,19 @@ bindkey '^N' history-substring-search-down    # Ctrl+N
 
 complete -C '/usr/local/bin/aws_completer' aws
 
-# Enable fzf if installed (fuzzy finder for commands, files, and history)
-if [ -f ~/.fzf.zsh ]; then
-    source ~/.fzf.zsh
+# Enable fzf if installed (fuzzy finder for commands, files, and history).
+# Prefer native `fzf --zsh` when supported; otherwise source legacy scripts.
+if command -v fzf >/dev/null 2>&1; then
+    if fzf --help 2>/dev/null | grep -q -- '--zsh'; then
+        eval "$(fzf --zsh)"
+    else
+        if [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+            source /usr/share/doc/fzf/examples/key-bindings.zsh
+        fi
+        if [ -f /usr/share/doc/fzf/examples/completion.zsh ]; then
+            source /usr/share/doc/fzf/examples/completion.zsh
+        fi
+    fi
     export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:wrap"
 fi
 

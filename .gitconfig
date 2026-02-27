@@ -11,8 +11,8 @@
 	prune = true
 
 [alias]
+	ad = add
     co = checkout
-	p = push
 	st = status -sb
 	cm = commit -m
 	br = branch
