@@ -111,7 +111,8 @@ fi
 # Enhanced history configuration for devcontainers
 if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     # We're in a container - use container-specific history with sync
-    export HISTFILE="${HISTFILE:-$HOME/.zsh_history_container}"
+    # Always use an isolated container history file to avoid host/container corruption.
+    export HISTFILE="$HOME/.zsh_history_container"
     export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
     export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
 
@@ -130,6 +131,9 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             fi
             echo "✅ History file repaired"
         fi
+
+        # Never fail shell startup due to history repair status.
+        return 0
     }
 
     # Sync function to merge host history (optional)
@@ -147,7 +151,7 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     }
 
     # Check and fix history on startup
-    fix_corrupt_history
+    fix_corrupt_history || true
 
     # Option to use separate history for container
     if [ -f "$HOME/.zsh_history_local" ]; then
@@ -188,9 +192,17 @@ alias dc="docker compose"
 alias tf="terraform"
 
 # History management aliases
-alias fix-history='fix_corrupt_history'
-alias history-backup='cp "$HISTFILE" "${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"'
-alias sync-history='sync_host_history'
+fix-history() {
+    fix_corrupt_history
+}
+
+history-backup() {
+    cp "$HISTFILE" "${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
+}
+
+sync-history() {
+    sync_host_history
+}
 
 # Oh My Zsh update alias
 alias omz-update='omz update'
