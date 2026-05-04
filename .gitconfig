@@ -12,11 +12,13 @@
 
 [alias]
 	ad = add
+	df = diff
     co = checkout
 	st = status -sb
 	cm = commit -m
 	br = branch
-	prune-gone = "!git fetch --all --prune && for b in $(git branch -vv | awk '/: gone]/{print $1}'); do git branch --merged | grep -q \"^[* ] $b$\" && git branch -d \"$b\"; done"
+	prune-gone = "!git branch --merged | grep -v '^\\*\\|main\\|master\\|develop' | xargs git branch -d"
+
 
 [branch]
 	# from https://youtu.be/aolI_Rz0ZqY?t=1034

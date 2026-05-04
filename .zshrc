@@ -112,7 +112,7 @@ fi
 if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     # We're in a container - use container-specific history with sync
     # Always use an isolated container history file to avoid host/container corruption.
-    export HISTFILE="$HOME/.zsh_history_container"
+    export HISTFILE="${HISTFILE:-$HOME/.zsh_history_container/.zsh_history}"
     export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
     export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
 
