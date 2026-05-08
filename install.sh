@@ -1,7 +1,13 @@
 #!/bin/bash
+#!/bin/bash
 
-echo -e "\e[32m"
-echo ".dotfile installation STARTING"
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+GREEN='\033[0;32m'
+RESET='\033[0m'
+
+echo "${GREEN}.dotfile installation STARTING${RESET}"
 
 IS_CONTAINER=false
 if [ -n "$REMOTE_CONTAINERS" ] || [ -f "/.dockerenv" ]; then
