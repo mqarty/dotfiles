@@ -14,6 +14,7 @@
 	ad = add
 	df = diff
     co = checkout
+	chekcout = checkout --- IGNORE ---
 	st = status -sb
 	cm = commit -m
 	br = branch
