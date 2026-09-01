@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
@@ -37,10 +36,10 @@ cp ./.gitconfig ~
 # oh-my-zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Installing oh-my-zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
+    timeout 60 sh -c "$(timeout 30 curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || echo "oh-my-zsh install timed out"
 else
     echo "oh-my-zsh already installed, updating..."
-    git -C "$HOME/.oh-my-zsh" pull --rebase || true
+    timeout 30 git -C "$HOME/.oh-my-zsh" pull --rebase || echo "oh-my-zsh update timed out"
 fi
 
 cp ./.zshrc ~
@@ -49,20 +48,20 @@ cp ./.zshrc ~
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || echo "Failed to clone zsh-autosuggestions"
 fi
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" || echo "Failed to clone zsh-syntax-highlighting"
 fi
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-history-substring-search" ]; then
-    git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search "$ZSH_CUSTOM/plugins/zsh-history-substring-search"
+    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search "$ZSH_CUSTOM/plugins/zsh-history-substring-search" || echo "Failed to clone zsh-history-substring-search"
 fi
 
 # fzf
 if [ ! -d "$HOME/.fzf" ]; then
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || true
+    timeout 30 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || echo "Failed to clone fzf"
     ~/.fzf/install --all --no-update-rc 2>/dev/null || true
 fi
 
