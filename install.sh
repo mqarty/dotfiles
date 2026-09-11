@@ -18,26 +18,43 @@ if [[ "$(uname)" == "Darwin" ]]; then
     IS_MAC=true
 fi
 
-# Essential tools
+# Essential and development tools
 echo "Checking essential tools..."
 TOOLS_TO_INSTALL=""
+BREW_TOOLS="zsh curl wget jq git unzip terraform docker gh aws-cli python3 tmux"
+APT_TOOLS="zsh curl wget jq git unzip terraform docker.io gh awscli python3 tmux"
 
 # Check and install required tools
-for tool in zsh curl wget jq; do
-    if ! command -v $tool &> /dev/null; then
-        TOOLS_TO_INSTALL="$TOOLS_TO_INSTALL $tool"
-    fi
-done
+if $IS_MAC; then
+    for tool in zsh curl wget jq git unzip terraform docker gh aws-cli python3 tmux; do
+        if ! command -v $tool &> /dev/null; then
+            TOOLS_TO_INSTALL="$TOOLS_TO_INSTALL $tool"
+        fi
+    done
 
-if [ -n "$TOOLS_TO_INSTALL" ]; then
-    if $IS_MAC; then
+    if [ -n "$TOOLS_TO_INSTALL" ]; then
         echo "Installing missing tools via brew: $TOOLS_TO_INSTALL"
-        brew install $TOOLS_TO_INSTALL
-    else
+        brew install $TOOLS_TO_INSTALL 2>/dev/null || echo "Some tools may require manual installation"
+    fi
+else
+    for tool in zsh curl wget jq git unzip terraform docker gh awscli python3 tmux; do
+        if ! command -v $tool &> /dev/null; then
+            TOOLS_TO_INSTALL="$TOOLS_TO_INSTALL $tool"
+        fi
+    done
+
+    if [ -n "$TOOLS_TO_INSTALL" ]; then
         echo "Installing missing tools: $TOOLS_TO_INSTALL"
-        sudo apt-get update && sudo apt-get install -y $TOOLS_TO_INSTALL
+        sudo apt-get update && sudo apt-get install -y $TOOLS_TO_INSTALL 2>/dev/null || echo "Some tools may require manual installation"
+    fi
+
+    # Docker on Linux may need additional setup
+    if command -v docker &> /dev/null && ! groups | grep -q docker; then
+        echo "Note: Docker installed but you may need to run: sudo usermod -aG docker \$USER"
     fi
 fi
+
+echo "Essential tools setup complete"
 
 cp ./.gitconfig ~
 
