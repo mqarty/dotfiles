@@ -29,13 +29,23 @@ fi
 
 mkdir -p "$fonts_dir"
 
+state_dir="$HOME/.cache/dotfiles/fonts_installed"
+mkdir -p "$state_dir"
+
 for font in "${fonts[@]}"; do
+  stamp_file="$state_dir/${font}.version"
+  if [ -f "$stamp_file" ] && [ "$(cat "$stamp_file")" = "$version" ]; then
+    echo "$font ($version) already installed, skipping"
+    continue
+  fi
+
   zip_file="${font}.zip"
   download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
   echo "Downloading $download_url"
   wget "$download_url"
   unzip -o "$zip_file" -d "$fonts_dir"
   rm "$zip_file"
+  echo "$version" > "$stamp_file"
 done
 
 find "$fonts_dir" -name 'Windows Compatible' -delete

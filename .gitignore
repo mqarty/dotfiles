@@ -1,5 +1,6 @@
 # Secrets - never commit actual credentials
 .zshrc.secrets
+.gitconfig.local
 
 # OS-specific files
 .DS_Store

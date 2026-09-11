@@ -25,6 +25,21 @@ The `.zshrc` automatically sources `~/.zshrc.secrets` if it exists. This allows 
 
 **Important**: Never commit `.zshrc.secrets` - only the `.zshrc.secrets.example` template should be in git.
 
+## Machine-Specific Git Config
+
+`.gitconfig` automatically includes `~/.gitconfig.local` if it exists. Use this for anything that should differ per machine — a different email on a work vs. personal laptop, a signing key, a proxy — without forking `.gitconfig` itself.
+
+### Setup
+
+1. Copy the example template:
+   ```bash
+   cp .gitconfig.local.example ~/.gitconfig.local
+   ```
+
+2. Edit `~/.gitconfig.local` and uncomment/fill in whatever overrides you need.
+
+**Important**: Never commit `.gitconfig.local` - only the `.gitconfig.local.example` template should be in git.
+
 ## ZSH History Management
 
 The `.zshrc` includes automatic corruption detection and repair for history files in devcontainers.

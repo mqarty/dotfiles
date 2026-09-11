@@ -27,3 +27,8 @@
 
 [pager]
 	branch = false
+
+# Machine-specific overrides (different email/signing key on a given machine, etc.)
+# live in ~/.gitconfig.local, which is never committed. See .gitconfig.local.example.
+[include]
+	path = ~/.gitconfig.local
