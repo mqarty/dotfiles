@@ -33,16 +33,16 @@ cp ./.gitconfig ~
 # Fonts - host Mac only
 ./fonts.sh
 
-# oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "Installing oh-my-zsh..."
-    timeout 60 sh -c "$(timeout 30 curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || echo "oh-my-zsh install timed out"
-else
-    echo "oh-my-zsh already installed, updating..."
-    timeout 30 git -C "$HOME/.oh-my-zsh" pull --rebase || echo "oh-my-zsh update timed out"
-fi
+# oh-my-zsh (skipped - install manually if needed: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)")
+# if [ ! -d "$HOME/.oh-my-zsh" ]; then
+#     echo "Installing oh-my-zsh..."
+#     timeout 60 sh -c "$(timeout 30 curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || echo "oh-my-zsh install timed out"
+# else
+#     echo "oh-my-zsh already installed, updating..."
+#     timeout 30 git -C "$HOME/.oh-my-zsh" pull --rebase || echo "oh-my-zsh update timed out"
+# fi
 
-cp ./.zshrc ~
+# cp ./.zshrc ~  # commented out since oh-my-zsh is skipped
 
 # zsh plugins
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
