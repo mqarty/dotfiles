@@ -9,7 +9,7 @@ RESET='\033[0m'
 echo "${GREEN}.dotfile installation STARTING${RESET}"
 
 IS_CONTAINER=false
-if [ -n "$REMOTE_CONTAINERS" ] || [ -f "/.dockerenv" ]; then
+if [ -n "$REMOTE_CONTAINERS" ] || [ -f "/.dockerenv" ] || [ -n "$WSL_DISTRO_NAME" ]; then
     IS_CONTAINER=true
 fi
 
@@ -18,51 +18,81 @@ if [[ "$(uname)" == "Darwin" ]]; then
     IS_MAC=true
 fi
 
-# zsh - container has it in Dockerfile, Mac should have it via brew
-if ! command -v zsh &> /dev/null; then
+# Essential tools
+echo "Checking essential tools..."
+TOOLS_TO_INSTALL=""
+
+# Check and install required tools
+for tool in zsh curl wget jq; do
+    if ! command -v $tool &> /dev/null; then
+        TOOLS_TO_INSTALL="$TOOLS_TO_INSTALL $tool"
+    fi
+done
+
+if [ -n "$TOOLS_TO_INSTALL" ]; then
     if $IS_MAC; then
-        brew install zsh
+        echo "Installing missing tools via brew: $TOOLS_TO_INSTALL"
+        brew install $TOOLS_TO_INSTALL
     else
-        apt-get update && apt-get install -y zsh
+        echo "Installing missing tools: $TOOLS_TO_INSTALL"
+        sudo apt-get update && sudo apt-get install -y $TOOLS_TO_INSTALL
     fi
 fi
 
-cat bashrc.additions >> ~/.bashrc
 cp ./.gitconfig ~
 
 # Fonts - host Mac only
-./fonts.sh
-
-# oh-my-zsh (skipped - install manually if needed: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)")
-# if [ ! -d "$HOME/.oh-my-zsh" ]; then
-#     echo "Installing oh-my-zsh..."
-#     timeout 60 sh -c "$(timeout 30 curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || echo "oh-my-zsh install timed out"
-# else
-#     echo "oh-my-zsh already installed, updating..."
-#     timeout 30 git -C "$HOME/.oh-my-zsh" pull --rebase || echo "oh-my-zsh update timed out"
-# fi
-
-# cp ./.zshrc ~  # commented out since oh-my-zsh is skipped
-
-# zsh plugins
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || echo "Failed to clone zsh-autosuggestions"
+if [ -f ./fonts.sh ]; then
+    chmod +x ./fonts.sh
+    ./fonts.sh
 fi
 
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" || echo "Failed to clone zsh-syntax-highlighting"
+# oh-my-zsh installation
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing oh-my-zsh..."
+    if command -v curl &> /dev/null; then
+        timeout 60 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended 2>/dev/null || echo "oh-my-zsh install timed out or failed"
+    else
+        echo "curl not found, skipping oh-my-zsh installation"
+    fi
 fi
 
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-history-substring-search" ]; then
-    timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search "$ZSH_CUSTOM/plugins/zsh-history-substring-search" || echo "Failed to clone zsh-history-substring-search"
+# Copy .zshrc
+if [ ! -f "$HOME/.zshrc" ] && [ -f ./.zshrc ]; then
+    cp ./.zshrc ~
+    echo "Copied .zshrc to home directory"
+fi
+
+# zsh plugins - only if oh-my-zsh is installed
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    mkdir -p "$ZSH_CUSTOM/plugins"
+
+    if command -v git &> /dev/null; then
+        if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+            timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" 2>/dev/null || echo "Failed to clone zsh-autosuggestions"
+        fi
+
+        if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+            timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || echo "Failed to clone zsh-syntax-highlighting"
+        fi
+
+        if [ ! -d "$ZSH_CUSTOM/plugins/zsh-history-substring-search" ]; then
+            timeout 30 git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search "$ZSH_CUSTOM/plugins/zsh-history-substring-search" 2>/dev/null || echo "Failed to clone zsh-history-substring-search"
+        fi
+    else
+        echo "git not found, skipping oh-my-zsh plugins"
+    fi
 fi
 
 # fzf
-if [ ! -d "$HOME/.fzf" ]; then
-    timeout 30 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf || echo "Failed to clone fzf"
-    ~/.fzf/install --all --no-update-rc 2>/dev/null || true
+if command -v git &> /dev/null; then
+    if [ ! -d "$HOME/.fzf" ]; then
+        timeout 30 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf 2>/dev/null || echo "Failed to clone fzf"
+        if [ -f ~/.fzf/install ]; then
+            ~/.fzf/install --all --no-update-rc 2>/dev/null || true
+        fi
+    fi
 fi
 
 # Terraform autocomplete

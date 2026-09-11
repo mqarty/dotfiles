@@ -113,8 +113,11 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
     # We're in a container - use container-specific history with sync
     # Always use an isolated container history file to avoid host/container corruption.
     export HISTFILE="${HISTFILE:-$HOME/.zsh_history_container/.zsh_history}"
-    export HISTSIZE="${HISTSIZE:-10000}"         # Number of commands to remember in the command history
-    export SAVEHIST="${SAVEHIST:-10000}"         # Number of history entries
+    export HISTSIZE="${HISTSIZE:-10000}"
+    export SAVEHIST="${SAVEHIST:-10000}"
+
+    # Ensure history directory exists
+    mkdir -p "$(dirname "$HISTFILE")"
 
     # History corruption protection function
     fix_corrupt_history() {
@@ -122,9 +125,11 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             echo "🔧 Fixing corrupted history file..."
             # Create backup
             cp "$HISTFILE" "${HISTFILE}.corrupt.$(date +%s)" 2>/dev/null || true
-            # Try to salvage what we can
-            if command -v strings >/dev/null; then
-                strings "$HISTFILE" | grep -v '^$' > "${HISTFILE}.tmp" 2>/dev/null && mv "${HISTFILE}.tmp" "$HISTFILE" 2>/dev/null
+            # Try to salvage what we can (strings may not be available everywhere)
+            if command -v strings >/dev/null 2>&1; then
+                strings "$HISTFILE" 2>/dev/null | grep -v '^$' > "${HISTFILE}.tmp" 2>/dev/null && mv "${HISTFILE}.tmp" "$HISTFILE" 2>/dev/null || {
+                    echo "# ZSH History - Recovered $(date)" > "$HISTFILE"
+                }
             else
                 # Fallback: start with fresh history
                 echo "# ZSH History - Recovered $(date)" > "$HISTFILE"
@@ -132,7 +137,6 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             echo "✅ History file repaired"
         fi
 
-        # Never fail shell startup due to history repair status.
         return 0
     }
 
@@ -143,10 +147,14 @@ if [ -f /.dockerenv ] || [ -n "$REMOTE_CONTAINERS" ]; then
             # Backup current container history
             cp "$HISTFILE" "${HISTFILE}.pre-sync.$(date +%s)"
             # Try to merge (avoiding corruption)
-            {
-                cat "$HOME/.zsh_history" 2>/dev/null | strings 2>/dev/null
-                cat "$HISTFILE" 2>/dev/null | strings 2>/dev/null
-            } | sort -u > "${HISTFILE}.merged" && mv "${HISTFILE}.merged" "$HISTFILE"
+            if command -v strings >/dev/null 2>&1; then
+                {
+                    cat "$HOME/.zsh_history" 2>/dev/null | strings 2>/dev/null
+                    cat "$HISTFILE" 2>/dev/null | strings 2>/dev/null
+                } | sort -u > "${HISTFILE}.merged" 2>/dev/null && mv "${HISTFILE}.merged" "$HISTFILE" 2>/dev/null || true
+            else
+                echo "strings command not available, skipping merge"
+            fi
         fi
     }
 
@@ -179,9 +187,12 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion
 setopt HIST_FCNTL_LOCK           # Use fcntl for safer file locking (if available)
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# NVM (Node Version Manager) - only load if installed
+if [ -d "$HOME/.nvm" ]; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+fi
 
 alias ls='ls -A'
 
@@ -213,7 +224,12 @@ bindkey '^[[B' history-substring-search-down  # DOWN arrow
 bindkey '^P' history-substring-search-up      # Ctrl+P
 bindkey '^N' history-substring-search-down    # Ctrl+N
 
-complete -C '/usr/local/bin/aws_completer' aws
+# AWS CLI completion (if available)
+if command -v aws_completer &> /dev/null; then
+    complete -C 'aws_completer' aws
+elif [ -f '/usr/local/bin/aws_completer' ]; then
+    complete -C '/usr/local/bin/aws_completer' aws
+fi
 
 # Enable fzf if installed (fuzzy finder for commands, files, and history).
 # Prefer native `fzf --zsh` when supported; otherwise source legacy scripts.
@@ -231,8 +247,12 @@ if command -v fzf >/dev/null 2>&1; then
     export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:wrap"
 fi
 
-# Load pyenv automatically
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --no-rehash - zsh)"
+# Load pyenv automatically (if installed)
+if [ -d "$HOME/.pyenv" ]; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init --no-rehash - zsh)"
+    fi
+fi
 
