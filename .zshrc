@@ -256,3 +256,7 @@ if [ -d "$HOME/.pyenv" ]; then
     fi
 fi
 
+# Enable Temporal CLI completion for zsh
+if command -v temporal >/dev/null 2>&1; then
+    eval "$(temporal completion zsh)"
+fi
