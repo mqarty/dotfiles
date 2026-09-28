@@ -18,6 +18,8 @@
 	st = status -sb
 	cm = commit -m
 	br = branch
+	pus = push
+	pul = pull
 	prune-gone = "!git branch --merged | grep -v '^\\*\\|main\\|master\\|develop' | xargs git branch -d"
 
 
