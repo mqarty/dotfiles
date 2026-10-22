@@ -17,6 +17,7 @@
 	chekcout = checkout --- IGNORE ---
 	st = status -sb
 	cm = commit -m
+	comit = commit
 	br = branch
 	pus = push
 	pul = pull
