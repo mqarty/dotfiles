@@ -74,6 +74,10 @@ plugins=(git colored-man-pages colorize pip python zsh-syntax-highlighting zsh-a
 
 source $ZSH/oh-my-zsh.sh
 
+# Don't offer the 20 most recent commits when completing git refs; typing `b<TAB>`
+# otherwise lists every commit whose hash starts with b. Branches and tags still complete.
+zstyle ':completion:*:*:git*:*' tag-order '! commit-objects'
+
 # User configuration
 
 # Load secrets (API keys, tokens, etc.)
