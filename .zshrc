@@ -1,5 +1,8 @@
 # If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+# Linux (devcontainers) only; on macOS Homebrew and `~/.local/bin/env` set the PATH.
+if [[ "$OSTYPE" == linux* ]]; then
+    export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+fi
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -228,6 +231,9 @@ bindkey '^[[B' history-substring-search-down  # DOWN arrow
 bindkey '^P' history-substring-search-up      # Ctrl+P
 bindkey '^N' history-substring-search-down    # Ctrl+N
 
+# Lets `complete -C` (used by the AWS and Terraform completions below) work in zsh.
+autoload -U +X bashcompinit && bashcompinit
+
 # AWS CLI completion (if available)
 if command -v aws_completer &> /dev/null; then
     complete -C 'aws_completer' aws
@@ -263,4 +269,33 @@ fi
 # Enable Temporal CLI completion for zsh
 if command -v temporal >/dev/null 2>&1; then
     eval "$(temporal completion zsh)"
+fi
+
+# Terraform completion (if installed)
+if command -v terraform >/dev/null 2>&1; then
+    complete -o nospace -C "$(command -v terraform)" terraform
+fi
+
+# uv, and anything else the installer put in ~/.local/bin/env
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# Git aliases
+alias gst='git status'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gbD='git branch --delete --force'
+alias glo='git log --oneline --decorate'
+alias gp='git push'
+alias gpf='git push --force-with-lease --force-if-includes'
+alias gcm='git checkout master'
+alias gprom='git pull --rebase origin master'
+alias gitlogonelinepretty='git log --pretty=format:"%C(yellow)%h %Cred%ad %Cblue%an %Cgreen%s" --date=short'
+alias glop=gitlogonelinepretty
+
+# eza instead of ls (if installed)
+if command -v eza >/dev/null 2>&1; then
+    alias l='eza'
+    alias la='eza -a'
+    alias ll='eza -lah'
+    alias ls='eza --color=auto'
 fi
