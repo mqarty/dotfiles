@@ -64,20 +64,29 @@ if [ -f ./fonts.sh ]; then
     ./fonts.sh
 fi
 
+# Copy .zshrc BEFORE installing oh-my-zsh. The oh-my-zsh installer writes a stock
+# ~/.zshrc, which would otherwise make the "only if missing" check skip our copy
+# (and drop aliases like gs). KEEP_ZSHRC below stops the installer overwriting ours.
+if [ -f ./.zshrc ]; then
+    if [ ! -f "$HOME/.zshrc" ]; then
+        cp ./.zshrc ~
+        echo "Copied .zshrc to home directory"
+    elif grep -q 'Path to your Oh My Zsh installation' "$HOME/.zshrc" && ! cmp -s ./.zshrc "$HOME/.zshrc"; then
+        # existing file is a stock oh-my-zsh template, not a customised one: replace it (keep a backup)
+        cp "$HOME/.zshrc" "$HOME/.zshrc.pre-dotfiles.bak"
+        cp ./.zshrc ~
+        echo "Replaced stock .zshrc with dotfiles .zshrc (backup: ~/.zshrc.pre-dotfiles.bak)"
+    fi
+fi
+
 # oh-my-zsh installation
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Installing oh-my-zsh..."
     if command -v curl &> /dev/null; then
-        timeout 60 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended 2>/dev/null || echo "oh-my-zsh install timed out or failed"
+        KEEP_ZSHRC=yes timeout 60 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended 2>/dev/null || echo "oh-my-zsh install timed out or failed"
     else
         echo "curl not found, skipping oh-my-zsh installation"
     fi
-fi
-
-# Copy .zshrc
-if [ ! -f "$HOME/.zshrc" ] && [ -f ./.zshrc ]; then
-    cp ./.zshrc ~
-    echo "Copied .zshrc to home directory"
 fi
 
 # zsh plugins - only if oh-my-zsh is installed
